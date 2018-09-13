@@ -5,6 +5,7 @@ import { Context } from 'typedoc/dist/lib/converter/context';
 import { CommentPlugin } from 'typedoc/dist/lib/converter/plugins/CommentPlugin';
 import { ContainerReflection } from 'typedoc/dist/lib/models/reflections/container';
 import { getRawComment } from './getRawComment';
+import { parseComment} from 'typedoc/dist/lib/converter/factories/comment';
 
 /**
  * This plugin allows an ES6 module to specify its TypeDoc name.
@@ -69,6 +70,7 @@ export class ExternalModuleNamePlugin extends ConverterComponent {
       if (match) {
         // Look for @preferred
         let preferred = /@preferred/.exec(comment);
+        reflection.comment = parseComment(comment);
         // Set up a list of renames operations to perform when the resolve phase starts
         this.moduleRenames.push({
           renameTo: match[1],
@@ -80,7 +82,7 @@ export class ExternalModuleNamePlugin extends ConverterComponent {
 
     if (reflection.comment) {
       CommentPlugin.removeTags(reflection.comment, 'module');
-      CommentPlugin.removeTags(reflection.comment, 'preferred');
+      //CommentPlugin.removeTags(reflection.comment, 'preferred');
     }
   }
 
@@ -124,7 +126,19 @@ export class ExternalModuleNamePlugin extends ConverterComponent {
 
       // If @preferred was found on the current item, update the mergeTarget's comment
       // with comment from the renaming module
-      if (item.preferred) mergeTarget.comment = renaming.comment;
+      //if (item.preferred) mergeTarget.comment = renaming.comment;
+      if (item.preferred) {
+        if (renaming.comment){
+            let commentTags = renaming.comment.tags.filter((item) => { return item.tagName == 'preferred'});
+            
+            if (commentTags.length > 0) {
+                renaming.comment.text = commentTags[0].text;
+            }
+        }
+        
+        mergeTarget.comment = renaming.comment;
+    }
+
 
       // Now that all the children have been relocated to the mergeTarget, delete the empty module
       // Make sure the module being renamed doesn't have children, or they will be deleted
