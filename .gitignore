@@ -3,9 +3,9 @@
 *.iml
 **/.*
 
-# Built using tsc
-plugin.js
-getRawComment.js
+# # Built using tsc
+# plugin.js
+# getRawComment.js
 
 # Logs
 logs
